@@ -131,6 +131,7 @@ contract TradeRegulation is Ownable{
        address nextOwner;
    }
    mapping(bytes32=>Tx) trades;
+   mapping(bytes32=>uint) amountCondition;
 
    function createTrade(bytes32 uid, address[] tradeParties, bytes32[] tradePartiesRole) {
     trades[uid].tradeParties = tradeParties;
@@ -150,18 +151,30 @@ contract TradeRegulation is Ownable{
   function isUploadAllowed(bytes32 role, bytes32 docType) internal returns(bool success) {
      bool isAllowed = false;
      if ((role == "buyer" && (docType == "PurchaseOrder")) ||
-       ((role == "seller") && (docType == "Quotation")) ||
+       ((role == "seller") && (docType == "Invoice")) ||
        (role == "shipper" && docType == "BillOfLading") || (role == "insurer" && docType == "InuranceQuotation")) {
        isAllowed = true;
      }
      return isAllowed;
    }
    function payToSeller(bytes32 id) {
+   if(!isAmountMet) {
+    return;
+   }
      if(now>trades[id].shippingDate+trades[id].loc.numDays && trades[id].shippingDate<(trades[id].locIssueDate+trades[id].loc.numDays)) {
        trades[id].ethAddressByRole["seller"].transfer(trades[id].loc.creditAmt);
      }
    }
    function payToInsurer(bytes32 id) {
      trades[id].ethAddressByRole["insurer"].transfer(trades[id].insuranceAmt);
+   }
+   function createConditions(uint amount, bytes32 id) {
+    amountCondition[id]=amount;
+   }
+   function isAmountMet(uint amountReceived, bytes32 id) returns (bool) {
+    if(amountCondition[id]==amountReceived) {
+      return true;
+    }
+    return false;
    }
 }
