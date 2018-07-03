@@ -98,7 +98,7 @@ contract TradeRegulation is Ownable{
       PARTIALLY_APPROVED
   }
   struct doc{
-      mapping(uint=>string) versionDir;
+      mapping(uint=>bytes) versionDir;
       Status stat;
       uint version;
   }
@@ -114,8 +114,10 @@ contract TradeRegulation is Ownable{
   }
 
   struct Tx{
-       mapping(address=>Role) tradePartiesRole;
-       mapping(string=>doc) typeToDoc;
+      address[] tradeParties;
+       mapping(address=>bytes32) tradePartiesRole;
+       mapping(bytes32=>doc) typeToDoc;
+        mapping(bytes32 => address) ethAddressByRole;
        LetterOfCredit loc;
        Invoice inv;
        uint insuranceAmt;
@@ -128,21 +130,21 @@ contract TradeRegulation is Ownable{
        proofStatus proof ;
        address nextOwner;
    }
-   mapping(string=>Tx) trades;
-   function createTrade(uint id, address next, string loca){
-   Tx temp;
-   temp.location = loca;
-   temp.nextOwner = next;
-   temp.owner = msg.sender; //could be modified
-   trace[id].push(temp);
+   mapping(bytes32=>Tx) trades;
+
+   function createTrade(bytes32 uid, address[] tradeParties, bytes32[] tradePartiesRole) {
+    trades[uid].tradeParties = tradeParties;
+    for (uint i = 0; i < tradeParties.length; i++) {
+      trades[uid].tradePartiesRole[tradeParties[i]] = tradePartiesRole[i];
+    }
    }
 
    function upload(bytes32 uid, address sender, bytes32 docType, bytes _hash) {
     bytes32 role = trades[uid].tradePartiesRole[sender];
     if (isUploadAllowed(role, docType)) {
-      var currIndex = trades[uid].docByType[docType].version++;
-      trades[uid].docByType[docType].versiondir[currIndex] = _hash;
-      trades[uid].docByType[docType].status = docStatus.UNDER_REVIEW;
+      var currIndex = trades[uid].typeToDoc[docType].version++;
+      trades[uid].typeToDoc[docType].versionDir[currIndex] = _hash;
+      trades[uid].typeToDoc[docType].stat = Status.UNDER_REVIEW;
     } else return;
   }
   function isUploadAllowed(bytes32 role, bytes32 docType) internal returns(bool success) {
@@ -154,12 +156,12 @@ contract TradeRegulation is Ownable{
      }
      return isAllowed;
    }
-   function payToSeller(string id) {
-     if(now>trades[id].shippingDate+trades[id].loc.numDays && trades[id].shippingDate<(trades[id].issueDate+trades[id].loc.numDays)) {
-       trades[id].ethAddressByRole["seller"].transfer(trades[id].loc.creditAmount);
+   function payToSeller(bytes32 id) {
+     if(now>trades[id].shippingDate+trades[id].loc.numDays && trades[id].shippingDate<(trades[id].locIssueDate+trades[id].loc.numDays)) {
+       trades[id].ethAddressByRole["seller"].transfer(trades[id].loc.creditAmt);
      }
    }
-   function payToInsurer(string id) {
+   function payToInsurer(bytes32 id) {
      trades[id].ethAddressByRole["insurer"].transfer(trades[id].insuranceAmt);
    }
 }
