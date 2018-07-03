@@ -16,13 +16,19 @@ contract Ownable{
 
 contract TradeRegulation is Ownable{
     //trace
+    //The trace functionality is designed in the way that when a party produces a product
+    //it needs to upload the information regarding the product onto the blockchain. The proofstatus of
+    //that specific information will be set as pending right after the info is uploaded. By the time the receiver
+    //received the product, it can choose either to approve or reject it after careful examination. If it rejects it,
+    //further resolving actions will be executed.
+
     struct Proof {//connect name to address
         string location;
         uint productID;
         address owner;
         proofStatus proof ;
         address nextOwner;
-        hash photoHash;
+        bytes32 photo;
     }
 
     enum proofStatus {
@@ -31,17 +37,19 @@ contract TradeRegulation is Ownable{
         rejected
     }
 
-    mapping(uint=>Proof[]) trace;
+    mapping(uint=>Proof[]) trace;  //for a single product, there is only one supply chain
 
     //@param pI = productID
     //@param address of the next Owner
     //@param the location of the checkpoint
     //initialize a supply chain (done by raw material producer)
-    /*function initSC(uint pI, address next, string loca){
+    /*function initSC(uint pI, address next, string loca, bytes pho){
          Proof temp;
          temp.location = loca;
          temp.nextOwner = next;
          temp.owner = msg.sender; //could be modified
+         temp.proof = proofStatus.pending;
+         temp.photo = pho;
          trace[pI].push(temp);
     }
     */
