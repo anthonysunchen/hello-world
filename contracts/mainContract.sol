@@ -36,13 +36,14 @@ contract TradeRegulation is Ownable{
     //@param address of the next Owner
     //@param the location of the checkpoint
     //initialize a supply chain (done by raw material producer)
-    function initSC(uint pI, address next, string loca){
+    /*function initSC(uint pI, address next, string loca){
          Proof temp;
          temp.location = loca;
          temp.nextOwner = next;
          temp.owner = msg.sender; //could be modified
          trace[pI].push(temp);
     }
+    */
 
      function checkApproved (uint pI) returns (bool){
             require(trace[pI].length != 0);
@@ -111,13 +112,7 @@ contract TradeRegulation is Ownable{
       uint owedAmt;
       Status stat;
   }
-  enum Role{
-  Buyer,
-  Seller,
-  Insurer,
-  Banker,
-  Shipper
-  }
+
   struct Tx{
        mapping(address=>Role) tradePartiesRole;
        mapping(string=>doc) typeToDoc;
@@ -134,22 +129,31 @@ contract TradeRegulation is Ownable{
        address nextOwner;
    }
    mapping(string=>Tx) trades;
-   function createTrade(string id, Role[] tradePartyRoles){
-     trades[id].=tradeParties;
-     for(uint i=0; i<tradeParties.length; i++) {
-       trades[id].tradePartiesRole[tradeParties[i]]=tradePartyRoles[i];
-     }
-   }
-   function upload(string id, address sender, string docType, string hash, string action) {
-   if(actionOnDocUpload(id,sender,docType,action)!=true) {
-    return;
-   }
-   string roleSender=trades[id].tradePartiesRole[sender];
-   uint newIndex=(trades[id].typeToDoc[docType].version)+1;
-   trades[id].typeToDoc[docType].versionDir[newIndex]=hash;
-   trades[id].typeToDoc[docType].stat=Status.UNDER_REVIEW;
+   function createTrade(uint id, address next, string loca){
+   Tx temp;
+   temp.location = loca;
+   temp.nextOwner = next;
+   temp.owner = msg.sender; //could be modified
+   trace[id].push(temp);
    }
 
+   function upload(bytes32 uid, address sender, bytes32 docType, bytes _hash) {
+    bytes32 role = trades[uid].tradePartiesRole[sender];
+    if (isUploadAllowed(role, docType)) {
+      var currIndex = trades[uid].docByType[docType].version++;
+      trades[uid].docByType[docType].versiondir[currIndex] = _hash;
+      trades[uid].docByType[docType].status = docStatus.UNDER_REVIEW;
+    } else return;
+  }
+  function isUploadAllowed(bytes32 role, bytes32 docType) internal returns(bool success) {
+     bool isAllowed = false;
+     if ((role == "buyer" && (docType == "PurchaseOrder")) ||
+       ((role == "seller") && (docType == "Quotation")) ||
+       (role == "shipper" && docType == "BillOfLading") || (role == "insurer" && docType == "InuranceQuotation")) {
+       isAllowed = true;
+     }
+     return isAllowed;
+   }
    function payToSeller(string id) {
      if(now>trades[id].shippingDate+trades[id].loc.numDays && trades[id].shippingDate<(trades[id].issueDate+trades[id].loc.numDays)) {
        trades[id].ethAddressByRole["seller"].transfer(trades[id].loc.creditAmount);
