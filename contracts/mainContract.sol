@@ -22,6 +22,7 @@ contract TradeRegulation is Ownable{
         address owner;
         proofStatus proof ;
         address nextOwner;
+        hash photo;
     }
 
     enum proofStatus {
