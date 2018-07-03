@@ -144,13 +144,14 @@ contract TradeRegulation is Ownable{
    if(actionOnDocUpload(id,sender,docType,action)!=true) {
     return;
    }
+
    string roleSender=trades[id].tradePartiesRole[sender];
    uint newIndex=(trades[id].typeToDoc[docType].version)+1;
    trades[id].typeToDoc[docType].versionDir[newIndex]=hash;
    trades[id].typeToDoc[docType].stat=Status.UNDER_REVIEW;
    }
 
-   function payToSeller(string id) {
+   function payToSeller(string id) { //compare amount
      if(now>trades[id].shippingDate+trades[id].loc.numDays && trades[id].shippingDate<(trades[id].issueDate+trades[id].loc.numDays)) {
        trades[id].ethAddressByRole["seller"].transfer(trades[id].loc.creditAmount);
      }
