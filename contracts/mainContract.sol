@@ -22,7 +22,7 @@ contract TradeRegulation is Ownable{
         address owner;
         proofStatus proof ;
         address nextOwner;
-        hash photo;
+        hash photoHash;
     }
 
     enum proofStatus {
@@ -74,13 +74,14 @@ contract TradeRegulation is Ownable{
     //@param  status = whether you approve it or not
     //approve that the status of the product is correct
 
-    function uploadInfo (uint pI, proofStatus status, address next, string location)
+    function uploadInfo (uint pI, proofStatus status, address next, string location, hash photo)
     {
             if (checkApproved(pI)){
             Proof temp;
             temp.location = location;
             temp.nextOwner = next;
             temp.owner = msg.sender;
+            temp.photoHash=photo;
             trace[pI].push(temp);
         }
     }
@@ -130,15 +131,17 @@ contract TradeRegulation is Ownable{
        address owner;
        proofStatus proof ;
        address nextOwner;
+       uint objCount;
    }
    mapping(bytes32=>Tx) trades;
    mapping(bytes32=>uint) amountCondition;
 
-   function createTrade(bytes32 uid, address[] tradeParties, bytes32[] tradePartiesRole) {
+   function createTrade(bytes32 uid, address[] tradeParties, bytes32[] tradePartiesRole, uint objCount) {
     trades[uid].tradeParties = tradeParties;
     for (uint i = 0; i < tradeParties.length; i++) {
       trades[uid].tradePartiesRole[tradeParties[i]] = tradePartiesRole[i];
     }
+    trades[uid].objCount=objCount;
    }
 
    function upload(bytes32 uid, address sender, bytes32 docType, bytes _hash) {
@@ -160,7 +163,7 @@ contract TradeRegulation is Ownable{
    }
    function payToSeller(bytes32 id) {
    if(!isAmountMet) {
-    return;
+    revert();
    }
      if(now>trades[id].shippingDate+trades[id].loc.numDays && trades[id].shippingDate<(trades[id].locIssueDate+trades[id].loc.numDays)) {
        trades[id].ethAddressByRole["seller"].transfer(trades[id].loc.creditAmt);
@@ -169,11 +172,9 @@ contract TradeRegulation is Ownable{
    function payToInsurer(bytes32 id) {
      trades[id].ethAddressByRole["insurer"].transfer(trades[id].insuranceAmt);
    }
-   function createConditions(uint amount, bytes32 id) {
-    amountCondition[id]=amount;
-   }
+
    function isAmountMet(uint amountReceived, bytes32 id) returns (bool) {
-    if(amountCondition[id]==amountReceived) {
+    if(objCount==amountReceived) {
       return true;
     }
     return false;
