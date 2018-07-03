@@ -129,26 +129,7 @@ contract TradeRegulation is Ownable{
        address nextOwner;
    }
    mapping(string=>Tx) trades;
-<<<<<<< HEAD
-   function createTrade(string id, Role[] tradePartyRoles){
-     trades[id].=tradeParties;
-     for(uint i=0; i<tradeParties.length; i++) {
-       trades[id].tradePartiesRole[tradeParties[i]]=tradePartyRoles[i];
-     }
-   }
-   function upload(string id, address sender, string docType, string hash, string action) {
-   if(actionOnDocUpload(id,sender,docType,action)!=true) {
-    return;
-   }
 
-   string roleSender=trades[id].tradePartiesRole[sender];
-   uint newIndex=(trades[id].typeToDoc[docType].version)+1;
-   trades[id].typeToDoc[docType].versionDir[newIndex]=hash;
-   trades[id].typeToDoc[docType].stat=Status.UNDER_REVIEW;
-   }
-
-   function payToSeller(string id) { //compare amount
-=======
    function createTrade(uint id, address next, string loca){
    Tx temp;
    temp.location = loca;
@@ -174,8 +155,7 @@ contract TradeRegulation is Ownable{
      }
      return isAllowed;
    }
-   function payToSeller(string id) {
->>>>>>> b6bb0cf93ec57b88b10096fbcb2b4f277984b47d
+   function payToSeller(string id) {//compare amount
      if(now>trades[id].shippingDate+trades[id].loc.numDays && trades[id].shippingDate<(trades[id].issueDate+trades[id].loc.numDays)) {
        trades[id].ethAddressByRole["seller"].transfer(trades[id].loc.creditAmount);
      }
