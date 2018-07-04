@@ -65,7 +65,7 @@ contract TradeRegulation is Ownable{
      function approve(uint pI, address next)
         {
             require(trace[pI].length != 0);
-            if (msg.sender == trace[pI][trace[pI].length-1].owner){
+            if (msg.sender == trace[pI][trace[pI].length-1].nextOwner){
                 trace[pI][trace[pI].length-1].proof = proofStatus.approved ;
             }
 
@@ -74,7 +74,7 @@ contract TradeRegulation is Ownable{
      function reject (uint pI, address next)
         {
             require(trace[pI].length != 0);
-            if (msg.sender == trace[pI][trace[pI].length-1].owner){
+            if (msg.sender == trace[pI][trace[pI].length-1].nextOwner){
                 trace[pI][trace[pI].length-1].proof = proofStatus.rejected ;
             }
         }
