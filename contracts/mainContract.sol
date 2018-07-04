@@ -28,7 +28,7 @@ contract TradeRegulation is Ownable{
         address owner;
         proofStatus proof ;
         address nextOwner;
-        bytes32 photo;
+        bytes photo;
     }
 
     enum proofStatus {
@@ -83,7 +83,7 @@ contract TradeRegulation is Ownable{
     //@param  status = whether you approve it or not
     //approve that the status of the product is correct
 
-    function uploadInfo (uint pI, proofStatus status, address next, string location, hash photo)
+    function uploadInfo (uint pI, proofStatus status, address next, string location, bytes photo)
     {
             if (checkApproved(pI)){
             Proof temp;
