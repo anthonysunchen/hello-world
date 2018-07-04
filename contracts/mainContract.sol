@@ -269,13 +269,11 @@ contract TradeRegulation is Ownable{
 
    bool isAmtMet=false;
 
-   function isAmountMet(uint amountReceived, bytes32 id) returns (bool) {
+   function isAmountMet(uint amountReceived, bytes32 id)  {
     if(trades[id].objCount==amountReceived) {
       isAmtMet=true;
-      return true;
     }
     isAmtMet=false;
-    return false;
    }
 
 
