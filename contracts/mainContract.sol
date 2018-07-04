@@ -65,9 +65,11 @@ contract TradeRegulation is Ownable{
     mapping(uint=>Proof[]) trace;  //for a single product, there is only one supply chain
 
     ///the functions of uploading info in the characterisitcs are not enough, but they will serve as a conceptual template
-    function updateProductType ( bytes productType ){
+    function updateProductType ( bytes productType, uint pI ){
+        if(isRightParties(trace[pI].transaction.tradeID)){
         Proof temp;
         temp.productInfo.productType = productType;
+        }
 
     }
 
@@ -85,8 +87,8 @@ contract TradeRegulation is Ownable{
          temp.owner = msg.sender; //could be modified
          temp.proof = proofStatus.pending;
          temp.photo = pho;
-         temp.roleOfAddress[msg.sender] = proofRoles.supplier;
          temp.transaction = trades[tradesID];
+         temp.roleOfAddress[msg.sender] = temp.transaction.tradePartiesRole[msg.sender];
          trace[pI].push(temp);
     }
     */
@@ -102,7 +104,7 @@ contract TradeRegulation is Ownable{
      function approve(uint pI, address next)
         {
             require(trace[pI].length != 0);
-            if (msg.sender == trace[pI][trace[pI].length-1].nextOwner){
+            if (msg.sender == trace[pI][trace[pI].length-1].nextOwner && isRightParties(trace[pI].transaction.tradeID)){
                 trace[pI][trace[pI].length-1].proof = proofStatus.approved ;
             }
 
@@ -111,7 +113,7 @@ contract TradeRegulation is Ownable{
      function reject (uint pI, address next)
         {
             require(trace[pI].length != 0);
-            if (msg.sender == trace[pI][trace[pI].length-1].nextOwner){
+            if (msg.sender == trace[pI][trace[pI].length-1].nextOwner && isRightParties(trace[pI].transaction.tradeID)){
                 trace[pI][trace[pI].length-1].proof = proofStatus.rejected ;
             }
         }
@@ -125,7 +127,7 @@ contract TradeRegulation is Ownable{
 
     function uploadInfo (uint pI, proofStatus status, address next, string location, bytes photo, proofRoles partyRole)
     {
-            if (checkApproved(pI)){
+            if (checkApproved(pI) && isRightParties(trace[pI].transaction.tradeID)){
             Proof temp;
             temp.location = location;
             temp.nextOwner = next;
@@ -173,6 +175,7 @@ contract TradeRegulation is Ownable{
   Struct with characteristics of a transaction between parties in supply chain.
   */
   struct Tx{
+       bytes32 tradeID;
        address[] tradeParties;
        mapping(address=>bytes32) tradePartiesRole;
        mapping(bytes32=>doc) typeToDoc;
@@ -184,7 +187,7 @@ contract TradeRegulation is Ownable{
        uint locIssueDate;
        uint version;
        uint objCount;
-       bytes32 tradeId;
+
    }
    mapping(bytes32=>Tx) trades;
    mapping(bytes32=>uint) amountCondition;
@@ -206,10 +209,11 @@ contract TradeRegulation is Ownable{
       trades[id].tradePartiesRole[tradeParties[i]] = tradePartiesRole[i];
       trades[id].ethAddressByRole[tradePartiesRole[i]] = tradeParties[i];
     }
+    trades[id].tradeID = id;
     trades[id].objCount=objCount;
     trades[id].insuranceAmt=insuranceAmt;
     trades[id].version=0;
-    trades[id].tradeId=id;
+    trades[id].tradeID=id;
     TradeCreated(id);
    }
 
