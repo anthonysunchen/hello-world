@@ -29,6 +29,16 @@ contract TradeRegulation is Ownable{
         proofStatus proof ;
         address nextOwner;
         bytes photo;
+        mapping(address => proofRoles) roleOfAddress;
+        qualityOfProduct infoProduct;
+    }
+
+    //the content of characteristics is not comprehensive, but it will serve as a conceptual template
+    struct characteristics {
+        //enum damageOrNot;
+        //enum quality;
+        bytes productType;
+        uint temperature; //some product need transferring within certain temperature range
     }
 
     enum proofStatus {
@@ -37,19 +47,36 @@ contract TradeRegulation is Ownable{
         rejected
     }
 
+    enum proofRoles {
+        supplier,
+        distributor,
+        retailer,
+        consumer
+    }
+
     mapping(uint=>Proof[]) trace;  //for a single product, there is only one supply chain
+
+    ///the functions of uploading info in the characterisitcs are not enough, but they will serve as a conceptual template
+    function updateProductType ( bytes productType ){
+        Proof.infoProduct.productType = productType;
+
+    }
 
     //@param pI = productID
     //@param address of the next Owner
     //@param the location of the checkpoint
-    //initialize a supply chain (done by raw material producer)
+    //initialize a supply chain (done by raw materials producers)
+
     /*function initSC(uint pI, address next, string loca, bytes pho){
+
+        //suppliers will have special address?
          Proof temp;
          temp.location = loca;
          temp.nextOwner = next;
          temp.owner = msg.sender; //could be modified
          temp.proof = proofStatus.pending;
          temp.photo = pho;
+         temp.roleOfAddress[msg.sender] = proofRoles.supplier;
          trace[pI].push(temp);
     }
     */
@@ -83,7 +110,10 @@ contract TradeRegulation is Ownable{
     //@param  status = whether you approve it or not
     //approve that the status of the product is correct
 
-    function uploadInfo (uint pI, proofStatus status, address next, string location, bytes photo)
+    //upload function can be modified according to real world situation; ex. if IoT can upload location by itself, there is no need to upload it manually.
+    //a separate function can be written
+
+    function uploadInfo (uint pI, proofStatus status, address next, string location, bytes photo, proofRoles)
     {
             if (checkApproved(pI)){
             Proof temp;
@@ -92,6 +122,7 @@ contract TradeRegulation is Ownable{
             temp.owner = msg.sender;
             temp.photoHash=photo;
             trace[pI].push(temp);
+
         }
     }
 
@@ -145,13 +176,15 @@ contract TradeRegulation is Ownable{
    mapping(bytes32=>Tx) trades;
    mapping(bytes32=>uint) amountCondition;
 
-   function createTrade(bytes32 uid, address[] tradeParties, bytes32[] tradePartiesRole, uint objCount) {
+
+   function createTrade(bytes32 uid, address[] tradeParties, bytes32[] tradePartiesRole, uint objCount) // need conditions to call  {
     trades[uid].tradeParties = tradeParties;
     for (uint i = 0; i < tradeParties.length; i++) {
       trades[uid].tradePartiesRole[tradeParties[i]] = tradePartiesRole[i];
     }
     trades[uid].objCount=objCount;
    }
+
 
    function upload(bytes32 uid, address sender, bytes32 docType, bytes _hash) {
     bytes32 role = trades[uid].tradePartiesRole[sender];
@@ -161,6 +194,16 @@ contract TradeRegulation is Ownable{
       trades[uid].typeToDoc[docType].stat = Status.UNDER_REVIEW;
     } else return;
   }
+
+    function isRightParities (bytes id, ) returns (bool){
+       for (uint i = 0; i < trade[id].tradeParties.length; i++){
+            if ( trades[id].tradeParties[i]  == msg.sender){
+                return true;
+            }
+       }
+       return false;
+    }
+
   function isUploadAllowed(bytes32 role, bytes32 docType) internal returns(bool success) {
      bool isAllowed = false;
      if ((role == "buyer" && (docType == "PurchaseOrder")) ||
@@ -170,6 +213,8 @@ contract TradeRegulation is Ownable{
      }
      return isAllowed;
    }
+
+
    function payToSeller(bytes32 id) {
    if(!isAmountMet) {
     revert("Incorrect Amount Received!");
@@ -178,9 +223,13 @@ contract TradeRegulation is Ownable{
        trades[id].ethAddressByRole["seller"].transfer(trades[id].loc.creditAmt);
      }
    }
+
+
    function payToInsurer(bytes32 id) {
      trades[id].ethAddressByRole["insurer"].transfer(trades[id].insuranceAmt);
    }
+
+
 
    function isAmountMet(uint amountReceived, bytes32 id) returns (bool) {
     if(trades[id].objCount==amountReceived) {
