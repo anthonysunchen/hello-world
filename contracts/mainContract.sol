@@ -1,6 +1,7 @@
 pragma solidity ^0.4.4;
 contract Ownable{
   address public owner;
+
   constructor() public {
       owner=msg.sender;
   }
@@ -8,6 +9,7 @@ contract Ownable{
       require(owner==msg.sender);
       _;
   }
+
   function transferOwnership(address newOwner) internal ownerOnly{
       require(newOwner!=address(0));
       owner=newOwner;
@@ -279,4 +281,18 @@ contract TradeRegulation is Ownable{
 
     DepositMade(id, msg.value);
    }
+}
+contract TemperatureRegulation is Ownable{
+  string location;
+  address temperatureWriter;
+  int minTemp;
+  int maxTemp;
+  constructor(int minTemp, int maxTemp, string loc, address tempWriter) {
+    minTemp=minTemp;
+    maxTemp=maxTemp;
+    location=loc;
+    temperatureWriter=tempWriter;
+  }
+  function
+
 }
