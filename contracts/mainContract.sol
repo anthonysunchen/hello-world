@@ -30,17 +30,21 @@ contract TradeRegulation is Ownable{
         address nextOwner;
         bytes photo;
         mapping(address => proofRoles) roleOfAddress;
-        characteristics infoProduct;
+        characteristics productInfo;
     }
+
 
     //the content of characteristics is not comprehensive, but it will serve as a conceptual template
     struct characteristics {
-        //enum damageOrNot;
-        //enum quality;
-        bytes productType;
-        uint temperature; //some product need transferring within certain temperature range
+
+                //enum damageOrNot;
+                //enum quality;
+                bytes productType;
+                uint temperature; //some product need transferring within certain temperature range
+
 
     }
+
 
     enum proofStatus {
         approved,
@@ -59,7 +63,8 @@ contract TradeRegulation is Ownable{
 
     ///the functions of uploading info in the characterisitcs are not enough, but they will serve as a conceptual template
     function updateProductType ( bytes productType ){
-        //Proof.infoProduct.productType = productType;
+        Proof temp;
+        temp.productInfo.productType = productType;
 
     }
 
