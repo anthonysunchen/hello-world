@@ -29,9 +29,9 @@ contract TradeRegulation is Ownable{
         proofStatus proof;
         address nextOwner;
         bytes photo;
-        mapping(address => proofRoles) roleOfAddress;
+        mapping(address => bytes32) roleOfAddress;
         characteristics productInfo;
-        Tx transaction;
+    //    Tx transaction;
     }
 
 
@@ -63,10 +63,11 @@ contract TradeRegulation is Ownable{
     }
 
     mapping(uint=>Proof[]) trace;  //for a single product, there is only one supply chain
+    mapping(uint => Tx) pitx; // productID pointing to transaction
 
     ///the functions of uploading info in the characterisitcs are not enough, but they will serve as a conceptual template
     function updateProductType ( bytes productType, uint pI ){
-        if(isRightParties(trace[pI].transaction.tradeID)){
+        if(isRightParties(pitx[pI].tradeID)){ // could be modified
         Proof temp;
         temp.productInfo.productType = productType;
         }
@@ -87,8 +88,9 @@ contract TradeRegulation is Ownable{
          temp.owner = msg.sender; //could be modified
          temp.proof = proofStatus.pending;
          temp.photo = pho;
-         temp.transaction = trades[tradesID];
-         temp.roleOfAddress[msg.sender] = temp.transaction.tradePartiesRole[msg.sender];
+       //  temp.transaction = trades[tradesID];
+         pitx[pI] = trades[tradesID];
+         temp.roleOfAddress[msg.sender] = pitx[pI].tradePartiesRole[msg.sender];
          trace[pI].push(temp);
     }
     */
@@ -104,7 +106,7 @@ contract TradeRegulation is Ownable{
      function approve(uint pI, address next)
         {
             require(trace[pI].length != 0);
-            if (msg.sender == trace[pI][trace[pI].length-1].nextOwner && isRightParties(trace[pI].transaction.tradeID)){
+            if (msg.sender == trace[pI][trace[pI].length-1].nextOwner && isRightParties(pitx[pI].tradeID)){
                 trace[pI][trace[pI].length-1].proof = proofStatus.approved ;
             }
 
@@ -113,7 +115,7 @@ contract TradeRegulation is Ownable{
      function reject (uint pI, address next)
         {
             require(trace[pI].length != 0);
-            if (msg.sender == trace[pI][trace[pI].length-1].nextOwner && isRightParties(trace[pI].transaction.tradeID)){
+            if (msg.sender == trace[pI][trace[pI].length-1].nextOwner && isRightParties(pitx[pI].tradeID)){
                 trace[pI][trace[pI].length-1].proof = proofStatus.rejected ;
             }
         }
@@ -127,13 +129,13 @@ contract TradeRegulation is Ownable{
 
     function uploadInfo (uint pI, proofStatus status, address next, string location, bytes photo, proofRoles partyRole)
     {
-            if (checkApproved(pI) && isRightParties(trace[pI].transaction.tradeID)){
+            if (checkApproved(pI) && isRightParties(pitx[pI].tradeID)){
             Proof temp;
             temp.location = location;
             temp.nextOwner = next;
             temp.owner = msg.sender;
             temp.photo=photo;
-            temp.roleOfAddress[msg.sender] = partyRole;
+            temp.roleOfAddress[msg.sender] = pitx[pI].tradePartiesRole[msg.sender];//
             trace[pI].push(temp);
 
         }
