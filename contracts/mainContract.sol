@@ -49,7 +49,7 @@ contract TradeRegulation is Ownable{
          temp.nextOwner = next;
          temp.owner = msg.sender; //could be modified
          temp.proof = proofStatus.pending;
-         temp.photo = pho;
+         temp.photoHash = pho;
          trace[pI].push(temp);
     }
     */
@@ -152,13 +152,17 @@ contract TradeRegulation is Ownable{
    event InsurerPayed(bytes32 id);
    event DepositMade(bytes32 id, uint amount);
 
-   function createTrade(bytes32 uid, address[] tradeParties, bytes32[] tradePartiesRole, uint objCount) {
-    trades[uid].tradeParties = tradeParties;
+   function createTrade(bytes32 id, address[] tradeParties, bytes32[] tradePartiesRole, uint objCount, uint insuranceAmt) {
+    trades[id].tradeParties = tradeParties;
     for (uint i = 0; i < tradeParties.length; i++) {
-      trades[uid].tradePartiesRole[tradeParties[i]] = tradePartiesRole[i];
+      trades[id].tradePartiesRole[tradeParties[i]] = tradePartiesRole[i];
+      trades[id].ethAddressByRole[tradePartiesRole[i]] = tradeParties[i];
     }
-    trades[uid].objCount=objCount;
-    TradeCreated(uid);
+    trades[id].objCount=objCount;
+    trades[id].insuranceAmt=insuranceAmt;
+    trades[id].version=0;
+    trades[id].tradeId=id;
+    TradeCreated(id);
    }
 
    function upload(bytes32 uid, address sender, bytes32 docType, bytes _hash) {
