@@ -212,8 +212,8 @@ contract TradeRegulation is Ownable{
     } else return;
   }
 
-    function isRightParities (bytes id ) returns (bool){
-       for (uint i = 0; i < trade[id].tradeParties.length; i++){
+    function isRightParties (bytes id ) returns (bool){
+       for (uint i = 0; i < trades[id].tradeParties.length; i++){
             if ( trades[id].tradeParties[i]  == msg.sender){
                 return true;
             }
