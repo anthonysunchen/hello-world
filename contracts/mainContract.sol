@@ -68,6 +68,7 @@ contract TradeRegulation is Ownable{
             if (msg.sender == trace[pI][trace[pI].length-1].owner){
                 trace[pI][trace[pI].length-1].proof = proofStatus.approved ;
             }
+
         }
 
      function reject (uint pI, address next)
@@ -171,7 +172,7 @@ contract TradeRegulation is Ownable{
    }
    function payToSeller(bytes32 id) {
    if(!isAmountMet) {
-    revert();
+    revert("Incorrect Amount Received!");
    }
      if(now>trades[id].shippingDate+trades[id].loc.numDays && trades[id].shippingDate<(trades[id].locIssueDate+trades[id].loc.numDays)) {
        trades[id].ethAddressByRole["seller"].transfer(trades[id].loc.creditAmt);
@@ -182,7 +183,7 @@ contract TradeRegulation is Ownable{
    }
 
    function isAmountMet(uint amountReceived, bytes32 id) returns (bool) {
-    if(objCount==amountReceived) {
+    if(trades[id].objCount==amountReceived) {
       return true;
     }
     return false;
