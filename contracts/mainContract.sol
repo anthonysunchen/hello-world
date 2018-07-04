@@ -30,7 +30,7 @@ contract TradeRegulation is Ownable{
         address nextOwner;
         bytes photo;
         mapping(address => proofRoles) roleOfAddress;
-        qualityOfProduct infoProduct;
+        characteristics infoProduct;
     }
 
     //the content of characteristics is not comprehensive, but it will serve as a conceptual template
@@ -236,7 +236,7 @@ contract TradeRegulation is Ownable{
    if(!isAmtMet) {
     revert("Incorrect Amount Received!");
    }
-     if(now>trades[id].shippingDate+trades[id].loc.numDays && trades[id].shippingDate<(trades[id].locIssueDate+trades[id].loc.numDays)) {
+     if(now>trades[id].shippingDate+trades[id].loc.numDays && trades[id].shippingDate<(trades[id].locIssueDate+trades[id].loc.numDays && isRightParties(id))) {
        trades[id].ethAddressByRole["seller"].transfer(trades[id].loc.creditAmt);
        SellerPayed(id, true);
      }
