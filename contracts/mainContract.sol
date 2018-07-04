@@ -26,7 +26,7 @@ contract TradeRegulation is Ownable{
         string location;
         uint productID;
         address owner;
-        proofStatus proof ;
+        proofStatus proof;
         address nextOwner;
         bytes photo;
         mapping(address => proofRoles) roleOfAddress;
@@ -55,6 +55,7 @@ contract TradeRegulation is Ownable{
     enum proofRoles {
         supplier,
         distributor,
+        transport,
         retailer,
         consumer
     }
@@ -119,7 +120,7 @@ contract TradeRegulation is Ownable{
     //upload function can be modified according to real world situation; ex. if IoT can upload location by itself, there is no need to upload it manually.
     //a separate function can be written
 
-    function uploadInfo (uint pI, proofStatus status, address next, string location, bytes photo, proofRoles)
+    function uploadInfo (uint pI, proofStatus status, address next, string location, bytes photo, proofRoles partyRole)
     {
             if (checkApproved(pI)){
             Proof temp;
@@ -127,6 +128,7 @@ contract TradeRegulation is Ownable{
             temp.nextOwner = next;
             temp.owner = msg.sender;
             temp.photo=photo;
+            temp.roleOfAddress[msg.sender] = partyRole;
             trace[pI].push(temp);
 
         }
