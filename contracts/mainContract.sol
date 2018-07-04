@@ -289,12 +289,53 @@ contract TemperatureRegulation is Ownable{
   address temperatureWriter;
   int minTemp;
   int maxTemp;
-  constructor(int minTemp, int maxTemp, string loc, address tempWriter) {
-    minTemp=minTemp;
-    maxTemp=maxTemp;
+  int[] failedTemps;
+  uint[] failedTimes;
+  uint totMeasured=0;
+  uint totFails=0;
+  constructor(int _minTemp, int _maxTemp, string loc, address tempWriter) {
+    minTemp=_minTemp;
+    maxTemp=_maxTemp;
     location=loc;
     temperatureWriter=tempWriter;
   }
-  function
-
+  modifier onlyTempWriter{
+    require(msg.sender==temperatureWriter);
+    _;
+  }
+  function fillFailArray(int[] allMeasurements, int[] emptyArr) {
+    for(uint i=0;i<allMeasurements.length;i++) {
+      if(allMeasurements[i]<minTemp||allMeasurements[i]>maxTemp) {
+        emptyArr.push(allMeasurements[i]);
+      }
+    }
+  }
+  //failedTemps parameter should be empty array, helper method will fill with failed temps.
+  function reportErrors(int[] allMeasurements, uint[] _failedTimes, int[] _failedTemps, uint _totMeasured) onlyTempWriter{
+    fillFailArray(allMeasurements, _failedTemps);
+    require(_failedTimes.length==_failedTemps);
+    //int currNumErr=failedTimes.length
+    int numErr=_failedTimes.length;
+    for(uint i=0; i<numErr;i++) {
+      failedTemps.push(_failedTemps[i]);
+      failedTimes.push(_failedTimes[i]);
+    }
+    totMeasured=_totMeasured;
+    totFails=numErr;
+  }
+  function success() returns(bool) {
+    return failedTemps.length==0 &&totMeasured=0 &&totFails=0;
+  }
+  function getNumMeasured() returns(uint) {
+    return totMeasured;
+  }
+  function getNumFailed() returns(uint) {
+    return totFails;
+  }
+  function getFailedTempAtIndex(uint index) {
+    return failedTemps[index];
+  }
+  function getTimeOfFailAtIndex(uint index) {
+  return failedTimes[index];
+  }
 }
