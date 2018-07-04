@@ -31,7 +31,9 @@ contract TradeRegulation is Ownable{
         bytes photo;
         mapping(address => proofRoles) roleOfAddress;
         characteristics productInfo;
+        Tx transaction;
     }
+
 
 
     //the content of characteristics is not comprehensive, but it will serve as a conceptual template
@@ -74,7 +76,7 @@ contract TradeRegulation is Ownable{
     //@param the location of the checkpoint
     //initialize a supply chain (done by raw materials producers)
 
-    /*function initSC(uint pI, address next, string loca, bytes pho){
+    /*function initSC(uint pI, address next, string loca, bytes pho, bytes32 tradesID){
 
         //suppliers will have special address?
          Proof temp;
@@ -84,6 +86,7 @@ contract TradeRegulation is Ownable{
          temp.proof = proofStatus.pending;
          temp.photo = pho;
          temp.roleOfAddress[msg.sender] = proofRoles.supplier;
+         temp.transaction = trades[tradesID];
          trace[pI].push(temp);
     }
     */
