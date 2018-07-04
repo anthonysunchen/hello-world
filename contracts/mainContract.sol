@@ -59,7 +59,7 @@ contract TradeRegulation is Ownable{
 
     ///the functions of uploading info in the characterisitcs are not enough, but they will serve as a conceptual template
     function updateProductType ( bytes productType ){
-        Proof.infoProduct.productType = productType;
+        //Proof.infoProduct.productType = productType;
 
     }
 
@@ -212,7 +212,7 @@ contract TradeRegulation is Ownable{
     } else return;
   }
 
-    function isRightParties (bytes id ) returns (bool){
+    function isRightParties (bytes32 id ) returns (bool){
        for (uint i = 0; i < trades[id].tradeParties.length; i++){
             if ( trades[id].tradeParties[i]  == msg.sender){
                 return true;
@@ -236,7 +236,7 @@ contract TradeRegulation is Ownable{
    if(!isAmtMet) {
     revert("Incorrect Amount Received!");
    }
-     if(now>trades[id].shippingDate+trades[id].loc.numDays && trades[id].shippingDate<(trades[id].locIssueDate+trades[id].loc.numDays && isRightParties(id))) {
+     if(now>trades[id].shippingDate+trades[id].loc.numDays && trades[id].shippingDate<(trades[id].locIssueDate+trades[id].loc.numDays) && isRightParties(id)) {
        trades[id].ethAddressByRole["seller"].transfer(trades[id].loc.creditAmt);
        SellerPayed(id, true);
      }
