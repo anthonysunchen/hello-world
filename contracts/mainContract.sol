@@ -198,6 +198,8 @@ contract TradeRegulation is Ownable{
    event DepositMade(bytes32 id, uint amount);
 
    function createTrade(bytes32 id, address[] tradeParties, bytes32[] tradePartiesRole, uint objCount, uint insuranceAmt) {
+    Tx storage myTrans;
+    trades[id]=myTrans;
     trades[id].tradeParties = tradeParties;
 
     for (uint i = 0; i < tradeParties.length; i++) {
