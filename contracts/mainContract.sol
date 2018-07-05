@@ -240,14 +240,15 @@ contract TradeRegulation is Ownable{
    }
 
 
-   function upload(bytes32 uid, address sender, bytes32 docType, bytes _hash) {
+   function upload(bytes32 uid, address sender, bytes32 docType, bytes _hash) returns (bool){
     bytes32 role = trades[uid].tradePartiesRole[sender];
     if (isUploadAllowed(role, docType)) {
       uint currIndex = trades[uid].typeToDoc[docType].version++;
       trades[uid].typeToDoc[docType].versionDir[currIndex] = _hash;
       trades[uid].typeToDoc[docType].stat = Status.UNDER_REVIEW;
+      return true;
       DocumentUploaded(uid,docType);
-    } else return;
+    } else return false;
   }
 
     function isRightParties (bytes32 id ) returns (bool){
