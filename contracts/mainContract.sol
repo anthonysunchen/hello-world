@@ -306,16 +306,16 @@ contract TemperatureRegulation is Ownable{
   function fillFailArray(int[] allMeasurements, int[] emptyArr) {
     for(uint i=0;i<allMeasurements.length;i++) {
       if(allMeasurements[i]<minTemp||allMeasurements[i]>maxTemp) {
-        emptyArr.push(allMeasurements[i]);
+        emptyArr[i]=(allMeasurements[i]);
       }
     }
   }
   //failedTemps parameter should be empty array, helper method will fill with failed temps.
   function reportErrors(int[] allMeasurements, uint[] _failedTimes, int[] _failedTemps, uint _totMeasured) onlyTempWriter{
     fillFailArray(allMeasurements, _failedTemps);
-    require(_failedTimes.length==_failedTemps);
+    require(_failedTimes.length==_failedTemps.length);
     //int currNumErr=failedTimes.length
-    int numErr=_failedTimes.length;
+    uint numErr=_failedTimes.length;
     for(uint i=0; i<numErr;i++) {
       failedTemps.push(_failedTemps[i]);
       failedTimes.push(_failedTimes[i]);
@@ -324,7 +324,7 @@ contract TemperatureRegulation is Ownable{
     totFails=numErr;
   }
   function success() returns(bool) {
-    return failedTemps.length==0 &&totMeasured=0 &&totFails=0;
+    return failedTemps.length==0 && totMeasured>0;
   }
   function getNumMeasured() returns(uint) {
     return totMeasured;
@@ -332,10 +332,10 @@ contract TemperatureRegulation is Ownable{
   function getNumFailed() returns(uint) {
     return totFails;
   }
-  function getFailedTempAtIndex(uint index) {
+  function getFailedTempAtIndex(uint index) returns (int){
     return failedTemps[index];
   }
-  function getTimeOfFailAtIndex(uint index) {
+  function getTimeOfFailAtIndex(uint index) returns (uint){
   return failedTimes[index];
   }
 }
