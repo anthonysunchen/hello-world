@@ -33,6 +33,7 @@ contract TradeRegulation is Ownable{
         bytes photo;
         mapping(address => bytes32) roleOfAddress;
         characteristics productInfo;
+        string statusProof;
     //    Tx transaction;
     }
 
@@ -48,6 +49,7 @@ contract TradeRegulation is Ownable{
 
 
     }
+
 
 
     enum proofStatus {
@@ -81,7 +83,7 @@ contract TradeRegulation is Ownable{
     //@param the location of the checkpoint
     //initialize a supply chain (done by raw materials producers)
 
-    /*function initSC(uint pI, address next, string loca, bytes pho, bytes32 tradesID){
+    function initSC(uint pI, address next, string loca, bytes pho, bytes32 tradesID){
 
         //suppliers will have special address?
          Proof temp;
@@ -95,7 +97,7 @@ contract TradeRegulation is Ownable{
          temp.roleOfAddress[msg.sender] = pitx[pI].tradePartiesRole[msg.sender];
          trace[pI].push(temp);
     }
-    */
+
 
      function checkApproved (uint pI) returns (bool){
             require(trace[pI].length != 0);
@@ -105,16 +107,18 @@ contract TradeRegulation is Ownable{
                     return false;
      }
 
-     function approve(uint pI, address next)
+     function approve(uint pI) returns (bool)
         {
             require(trace[pI].length != 0);
             if (msg.sender == trace[pI][trace[pI].length-1].nextOwner && isRightParties(pitx[pI].tradeID)){
                 trace[pI][trace[pI].length-1].proof = proofStatus.approved ;
+                return true;
             }
+            return false;
 
         }
 
-     function reject (uint pI, address next)
+     function reject (uint pI)
         {
             require(trace[pI].length != 0);
             if (msg.sender == trace[pI][trace[pI].length-1].nextOwner && isRightParties(pitx[pI].tradeID)){
@@ -143,9 +147,22 @@ contract TradeRegulation is Ownable{
         }
     }
 
-    function checkNodes (uint pI, uint stage) returns (string, address, proofStatus, address){
+    function checkNodes (uint pI, uint stage) returns (string, address, string, address){
         Proof storage temp = trace[pI][stage];
-        return(temp.location, temp.owner, temp.proof, temp.nextOwner );//could be changed
+        //string status;
+        if (temp.proof == proofStatus.approved){
+            temp.statusProof = "approved";
+        }
+        else{
+            if (temp.proof == proofStatus.pending){
+                temp.statusProof = "pending";
+            }
+            else{
+                temp.statusProof = "reject";
+            }
+        }
+
+        return(temp.location, temp.owner, temp.statusProof, temp.nextOwner );//could be changed
     }
 
     //trace
@@ -203,6 +220,7 @@ contract TradeRegulation is Ownable{
    event SellerPayed(bytes32 id, bool success);
    event InsurerPayed(bytes32 id);
    event DepositMade(bytes32 id, uint amount);
+
 
    function createTrade(bytes32 id, address[] tradeParties, bytes32[] tradePartiesRole, uint objCount, uint insuranceAmt) {
     Tx storage myTrans;
