@@ -81,7 +81,7 @@ contract TradeRegulation is Ownable{
     //@param the location of the checkpoint
     //initialize a supply chain (done by raw materials producers)
 
-    /*function initSC(uint pI, address next, string loca, bytes pho, bytes32 tradesID){
+    function initSC(uint pI, address next, string loca, bytes pho, bytes32 tradesID){
 
         //suppliers will have special address?
          Proof temp;
@@ -95,7 +95,7 @@ contract TradeRegulation is Ownable{
          temp.roleOfAddress[msg.sender] = pitx[pI].tradePartiesRole[msg.sender];
          trace[pI].push(temp);
     }
-    */
+
 
      function checkApproved (uint pI) returns (bool){
             require(trace[pI].length != 0);
