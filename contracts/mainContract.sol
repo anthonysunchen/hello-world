@@ -208,11 +208,11 @@ contract TradeRegulation is Ownable{
        uint locIssueDate;
        uint version;
        uint objCount;
-
+       mapping(address=>uint) balances;
    }
    mapping(bytes32=>Tx) trades;
    mapping(bytes32=>uint) amountCondition;
-   mapping(address=>uint) balances;
+
 
 
    event TradeCreated(bytes32 id);
@@ -277,8 +277,8 @@ contract TradeRegulation is Ownable{
    }
      if(now>trades[id].shippingDate+trades[id].loc.numDays && trades[id].shippingDate<(trades[id].locIssueDate+trades[id].loc.numDays) && isRightParties(id)) {
        trades[id].ethAddressByRole["seller"].transfer(trades[id].loc.creditAmt);
-       balances[trades[id].ethAddressByRole["seller"]]+=trades[id].loc.creditAmt;
-       balances[trades[id].ethAddressByRole["buyer"]]-=trades[id].loc.creditAmt;
+       trades[id].balances[trades[id].ethAddressByRole["seller"]]+=trades[id].loc.creditAmt;
+       trades[id].balances[trades[id].ethAddressByRole["buyer"]]-=trades[id].loc.creditAmt;
        SellerPayed(id, true);
      }
 
@@ -288,8 +288,8 @@ contract TradeRegulation is Ownable{
 
    function payToInsurer(bytes32 id) {
      trades[id].ethAddressByRole["insurer"].transfer(trades[id].insuranceAmt);
-     balances[trades[id].ethAddressByRole["insurer"]]+=trades[id].insuranceAmt;
-     balances[trades[id].ethAddressByRole["buyer"]]-=trades[id].insuranceAmt;
+     trades[id].balances[trades[id].ethAddressByRole["insurer"]]+=trades[id].insuranceAmt;
+     trades[id].balances[trades[id].ethAddressByRole["buyer"]]-=trades[id].insuranceAmt;
      InsurerPayed(id);
    }
 
@@ -304,8 +304,12 @@ contract TradeRegulation is Ownable{
 
 
    function depositFunds(bytes32 id) payable{
-    balances[trades[id].ethAddressByRole["buyer"]]+=msg.value;
+    trades[id].balances[trades[id].ethAddressByRole["buyer"]]+=msg.value;
     DepositMade(id, msg.value);
+   }
+
+   function getBalance(bytes32 id, address myAdd) returns (uint){
+    return trades[id].balances[myAdd];
    }
 }
 contract TemperatureRegulation is Ownable{
