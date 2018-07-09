@@ -133,7 +133,7 @@ contract TradeRegulation is Ownable{
     //upload function can be modified according to real world situation; ex. if IoT can upload location by itself, there is no need to upload it manually.
     //a separate function can be written
 
-    function uploadInfo (uint pI, proofStatus status, address next, string location, bytes photo, proofRoles partyRole)
+    function uploadInfo (uint pI, address next, string location, bytes photo)
     {
             if (checkApproved(pI) && isRightParties(pitx[pI].tradeID)){
             Proof temp;
@@ -141,6 +141,7 @@ contract TradeRegulation is Ownable{
             temp.nextOwner = next;
             temp.owner = msg.sender;
             temp.photo=photo;
+            temp.proofStatus = proofStatus.pending;
             temp.roleOfAddress[msg.sender] = pitx[pI].tradePartiesRole[msg.sender];//
             trace[pI].push(temp);
 
