@@ -208,11 +208,11 @@ contract TradeRegulation is Ownable{
        uint locIssueDate;
        uint version;
        uint objCount;
-       mapping(address=>uint) balances;
+
    }
    mapping(bytes32=>Tx) trades;
    mapping(bytes32=>uint) amountCondition;
-
+   mapping(address=>uint) balances;
 
 
    event TradeCreated(bytes32 id);
@@ -277,8 +277,8 @@ contract TradeRegulation is Ownable{
    }
      if(now>trades[id].shippingDate+trades[id].loc.numDays && trades[id].shippingDate<(trades[id].locIssueDate+trades[id].loc.numDays) && isRightParties(id)) {
        trades[id].ethAddressByRole["seller"].transfer(trades[id].loc.creditAmt);
-       trades[id].balances[trades[id].ethAddressByRole["seller"]]+=trades[id].loc.creditAmt;
-       trades[id].balances[trades[id].ethAddressByRole["buyer"]]-=trades[id].loc.creditAmt;
+       balances[trades[id].ethAddressByRole["seller"]]+=trades[id].loc.creditAmt;
+       balances[trades[id].ethAddressByRole["buyer"]]-=trades[id].loc.creditAmt;
        SellerPayed(id, true);
      }
 
@@ -288,8 +288,8 @@ contract TradeRegulation is Ownable{
 
    function payToInsurer(bytes32 id) {
      trades[id].ethAddressByRole["insurer"].transfer(trades[id].insuranceAmt);
-     trades[id].balances[trades[id].ethAddressByRole["insurer"]]+=trades[id].insuranceAmt;
-     trades[id].balances[trades[id].ethAddressByRole["buyer"]]-=trades[id].insuranceAmt;
+     balances[trades[id].ethAddressByRole["insurer"]]+=trades[id].insuranceAmt;
+     balances[trades[id].ethAddressByRole["buyer"]]-=trades[id].insuranceAmt;
      InsurerPayed(id);
    }
 
@@ -302,14 +302,12 @@ contract TradeRegulation is Ownable{
     isAmtMet=false;
    }
 
-
+    function test() returns (uint) {
+        return 2;
+    }
    function depositFunds(bytes32 id) payable{
-    trades[id].balances[trades[id].ethAddressByRole["buyer"]]+=msg.value;
+    balances[trades[id].ethAddressByRole["buyer"]]+=msg.value;
     DepositMade(id, msg.value);
-   }
-
-   function getBalance(bytes32 id, address myAdd) returns (uint){
-    return trades[id].balances[myAdd];
    }
 }
 contract TemperatureRegulation is Ownable{
@@ -327,6 +325,7 @@ contract TemperatureRegulation is Ownable{
     location=loc;
     temperatureWriter=tempWriter;
   }
+
   modifier onlyTempWriter{
     require(msg.sender==temperatureWriter);
     _;
@@ -339,7 +338,7 @@ contract TemperatureRegulation is Ownable{
     }
   }
   //failedTemps parameter should be empty array, helper method will fill with failed temps.
-  function reportErrors(int[] allMeasurements, uint[] _failedTimes, int[] _failedTemps, uint _totMeasured) onlyTempWriter{
+  function reportErrors(int[] allMeasurements, uint[] _failedTimes, int[] _failedTemps) onlyTempWriter{
     fillFailArray(allMeasurements, _failedTemps);
     require(_failedTimes.length==_failedTemps.length);
     //int currNumErr=failedTimes.length
@@ -348,7 +347,7 @@ contract TemperatureRegulation is Ownable{
       failedTemps.push(_failedTemps[i]);
       failedTimes.push(_failedTimes[i]);
     }
-    totMeasured=_totMeasured;
+    totMeasured=allMeasurements.length;
     totFails=numErr;
   }
   function success() returns(bool) {
@@ -364,6 +363,7 @@ contract TemperatureRegulation is Ownable{
     return failedTemps[index];
   }
   function getTimeOfFailAtIndex(uint index) returns (uint){
+
   return failedTimes[index];
   }
 }
