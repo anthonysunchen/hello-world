@@ -141,7 +141,7 @@ contract TradeRegulation is Ownable{
             temp.nextOwner = next;
             temp.owner = msg.sender;
             temp.photo=photo;
-            temp.proofStatus = proofStatus.pending;
+            temp.proof = proofStatus.pending;
             temp.roleOfAddress[msg.sender] = pitx[pI].tradePartiesRole[msg.sender];//
             trace[pI].push(temp);
 
